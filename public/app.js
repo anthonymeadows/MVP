@@ -1,8 +1,18 @@
+$(document).ready(function() {
+    if (window.location.href.indexOf("content.html") > -1) {
+        destroyPage();
+        buildPage();
+    }
+});
+
+let currentUser = localStorage.getItem('username');
+
+
 function validateLogin(e) {
     e.preventDefault();
 
-    let username = document.getElementById('username').value;
-    let password = document.getElementById('password').value;
+    let username = $('#username').val();
+    let password = $('#password').val();
 
     // Check for null values
     if (!username || !password) {
@@ -16,7 +26,6 @@ function validateLogin(e) {
                 localStorage.clear();
                 alert('Login successful!\nUsername: ' + username);
                 localStorage.setItem(`username`, username);
-                // Rediredirect to content page
                 window.location.href = "content.html";
             } else {
                 alert('Login failed. Please enter valid credentials.');
@@ -32,10 +41,10 @@ function createUser(e) {
     e.preventDefault();
     localStorage.clear();
 
-    const email = document.getElementById('email').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const password2 = document.getElementById('password2').value;
+    const email = $('#email').val();
+    const username = $('#username').val();
+    const password = $('#password').val();
+    const password2 = $('#password2').val();
 
     if (!username || !password || !email || !password2) {
         alert('All fields must be filled out');
@@ -60,7 +69,7 @@ function createUser(e) {
         success: function(response) {
             console.log('Server response:', response);
             alert('User created successfully, please wait to be redirected');
-            navigateToLogin()
+            navigateToLogin();
         },
         error: function(error) {
             console.error('Error from post:', error);
@@ -73,7 +82,83 @@ function navigateToLogin() {
     localStorage.clear();
     window.location.href = "login.html";
 }
+
 function navigateToCreate() {
     localStorage.clear();
     window.location.href = "create.html";
+}
+
+function buildPage() {
+    let currentUserContainer = $('<div>').attr('id', 'currentUserContainer');
+    let currentUserElement = $('<div>').attr('id', 'currentUser');
+    let underline = $('<div>').attr('id', 'underline');
+
+    currentUserContainer.append(currentUserElement, underline);
+
+    let landingPage = $('<div>').addClass('landingPage');
+
+    let earth = $('<div>').attr('id', 'earth');
+    let earthImg = $('<img>').attr('src', '/images/earth_tran_bg.png');
+    earth.append(earthImg);
+
+    let rocket = $('<div>').attr('id', 'rocket');
+    let rocketImg = $('<img>').attr('src', '/images/rocket_ship_TB.png').on('click', handleRocketClick);
+    rocket.append(rocketImg);
+
+    let rocketBox = $('<div>').addClass('rocket-box').on('click', handleRocketClick);
+    let rocketBoxText = $('<p>').text('Explore my decks');
+    rocketBox.append(rocketBoxText);
+
+    let satellite = $('<div>').attr('id', 'satellite').on('click', handleSatelliteClick);
+    let satelliteImg = $('<img>').attr('src', '/images/satellite.png');
+    satellite.append(satelliteImg);
+
+    let satelliteBox = $('<div>').addClass('satellite-box').on('click', handleSatelliteClick);
+    let satelliteBoxText = $('<p>').text('View my decks');
+    satelliteBox.append(satelliteBoxText);
+
+    let satelliteline = $('<div>').attr('id', 'satelliteline');
+
+    let satelliteline2 = $('<div>').attr('id', 'satelliteline2');
+
+    let moon = $('<div>').attr('id', 'moon').on('click', handleMoonClick);
+    let moonImg = $('<img>').attr('src', '/images/moon.png');
+    let plus = $('<div>').attr('id', 'plus').append($('<img>').attr('src', '/images/plus.png'));
+    moon.append(moonImg, plus);
+
+    let moonBox = $('<div>').addClass('moon-box').on('click', handleMoonClick);
+    let moonBoxText = $('<p>').text('Create a new deck');
+    moonBox.append(moonBoxText);
+
+    landingPage.append(earth, rocket, rocketBox, satellite, satelliteBox, satelliteline, satelliteline2, moon, moonBox);
+
+    $('body').append(currentUserContainer, landingPage);
+
+    if (currentUser) {
+        $("#currentUser").text(`Hello, ${currentUser}`);
+    }
+}
+
+function destroyPage() {
+    $('#currentUserContainer').remove();
+    $('.landingPage').remove();
+}
+
+function handleRocketClick() {
+    destroyPage();
+}
+
+function handleSatelliteClick() {
+    destroyPage();
+}
+
+function handleMoonClick() {
+    destroyPage();
+    let moon = $('<div>').attr('id', 'moonpagemoon').on('click', handleMoonClick);
+    let moonImg = $('<img>').attr('src', '/images/moon.png');
+    moon.append(moonImg);
+    $('body').append(moon);
+
+    let cardContainer = $('<div>').attr('id', 'cardContainer');
+    $('body').append(cardContainer);   
 }

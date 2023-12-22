@@ -5,31 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="styles.css">
-    <script>
-        let currentUser = localStorage.getItem('username')
-    </script>
     <title>MindFlare</title>
 </head>
 <body>
-    <div id = "currentUserContainer">
-        <div id = "currentUser" ></div>
-        <div id= "underline"></div>
-    </div>
-    <div class = landingPage>
-        <div id = earth>
-            <img src="/images/earth_tran_bg.png">
-        </div>
-        <div id = rocket>
-            <img src="/images/rocket_ship_TB.png">
-        </div>
-    </div>
     <script src="app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (currentUser) {
-                $("#currentUser").text(`Hello, ${currentUser}`);
-            }
-        });
-    </script>
 </body>
 </html>
