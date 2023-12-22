@@ -1,5 +1,3 @@
-let currentUser;
-
 function validateLogin(e) {
     e.preventDefault();
 
@@ -15,12 +13,14 @@ function validateLogin(e) {
     $.get('/validateLogin', { username: username, password: password })
         .done((response) => {
             if (response.success) {
+                localStorage.clear();
                 alert('Login successful!\nUsername: ' + username);
                 localStorage.setItem(`username`, username);
                 // Rediredirect to content page
                 window.location.href = "content.html";
             } else {
                 alert('Login failed. Please enter valid credentials.');
+                localStorage.clear();
             }
         })
         .fail(() => {
@@ -30,6 +30,7 @@ function validateLogin(e) {
 
 function createUser(e) {
     e.preventDefault();
+    localStorage.clear();
 
     const email = document.getElementById('email').value;
     const username = document.getElementById('username').value;
@@ -51,8 +52,6 @@ function createUser(e) {
         username: username,
         password: password
     };
-
-    // Send POST request to the server
     $.ajax({
         url: '/create',
         type: 'POST',
@@ -71,8 +70,10 @@ function createUser(e) {
 }
 
 function navigateToLogin() {
+    localStorage.clear();
     window.location.href = "login.html";
 }
 function navigateToCreate() {
+    localStorage.clear();
     window.location.href = "create.html";
 }

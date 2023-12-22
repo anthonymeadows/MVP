@@ -11,8 +11,11 @@
     <title>MindFlare</title>
 </head>
 <body>
-    <div id = "currentUser" ></div>
-    <script src="userdata.js"></script>
+    <div id = "currentUserContainer">
+        <div id = "currentUser" ></div>
+        <div id = "underline"></div>
+    </div>
+    <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (currentUser) {

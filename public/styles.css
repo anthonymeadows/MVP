@@ -71,3 +71,20 @@ button:hover {
 .btn:hover {
     background-color: #0056b3;
 }
+
+#currentUserContainer{
+    width: fit-content;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#currentUser {
+    font-size: 70px;
+}
+
+#underline {
+    position: relative;
+    border: 2px solid white;
+}
