@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        let currentUser = localStorage.getItem('username')
+    </script>
+    <title>MindFlare</title>
+</head>
+<body>
+    <div id = "currentUser" ></div>
+    <script src="userdata.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (currentUser) {
+                $("#currentUser").text(`Hello, ${currentUser}`);
+            }
+        });
+    </script>
+</body>
+</html>

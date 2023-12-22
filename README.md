@@ -24,19 +24,19 @@ title: Entity Relationship Diagram
 ---
 
 erDiagram
-    user {
+    users {
         id serial PK
         username varchar(255)
         email varchar(80)
         password varchar(255)
         premium boolean
     }
-    deck {
+    decks {
         id serial PK
         deckname varchar(255)
         user_id integer FK
     }
-    flashcard {
+    flashcards {
         id serial PK
         question varchar(300)
         answer varchar(3000)
@@ -47,9 +47,11 @@ erDiagram
         flashcard_id integer FK
     }
 
-    user ||--o{ deck : owns
-    deck ||--o{ deck_flashcard : contains
-    flashcard ||--o{ deck_flashcard : included_in
+    users ||--o{ decks : owns
+    decks ||--o{ deck_flashcard : contains
+    flashcards ||--o{ deck_flashcard : included_in
 ```
 
 Documentation Used => https://mermaid.js.org/
+
+Special Thanks => https://github.com/ajaymarathe/bootstrap-login-template
