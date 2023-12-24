@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users(
 
 CREATE TABLE IF NOT EXISTS decks(
     id serial PRIMARY KEY,
-    deckname varchar(30),
+    deckname varchar(100),
     user_id integer REFERENCES users(id)
 );
 

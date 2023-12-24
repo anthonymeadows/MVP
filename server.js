@@ -20,8 +20,6 @@ app.get('/validateLogin', async (req, res) => {
     try {
         const username = req.query.username;
         const password = req.query.password;
-        const allUsers = await pool.query('SELECT * FROM users')
-        console.log(allUsers.rows)
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
 
         console.log('validating credentials')
@@ -51,6 +49,35 @@ app.post('/create', async (req, res) => {
     try {
         await pool.query('INSERT INTO users(username, email, password, premium) VALUES ($1, $2, $3, $4)', [username, email, password, premium]);
         res.status(200).json({ message: 'User created' });
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+app.post('/postdeck', async (req, res) => {
+    try {
+        let { deckName, currentUser } = req.body;
+        let deckNameObj = {
+            'deckname': deckName,
+            'user_id': currentUser
+        };
+
+        // Check if a deck with the given name already exists for the current user
+        const existingDeck = await pool.query('SELECT * FROM decks WHERE deckname = $1 AND user_id = (SELECT id FROM users WHERE username = $2)', [deckName, currentUser]);
+
+        if (existingDeck.rows.length === 0) {
+            // Deck does not exist, create it
+            const currentUserIDResult = await pool.query('SELECT id FROM users WHERE username = $1', [currentUser]);
+            const currentUserID = currentUserIDResult.rows[0].id;
+
+            await pool.query('INSERT INTO decks(deckname, user_id) VALUES ($1, $2)', [deckName, currentUserID]);
+
+            res.status(200).json({ success: true, message: `Deck ${deckName} created` });
+        } else {
+            // Deck already exists for the current user
+            res.status(200).json({ success: false, error: `${deckNameObj} already exists` });
+        }
     } catch (error) {
         console.error('Error executing database query:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });

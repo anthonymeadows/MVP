@@ -14,7 +14,6 @@ function validateLogin(e) {
     let username = $('#username').val();
     let password = $('#password').val();
 
-    // Check for null values
     if (!username || !password) {
         alert('Please enter both username and password.');
         return;
@@ -160,5 +159,48 @@ function handleMoonClick() {
     $('body').append(moon);
 
     let cardContainer = $('<div>').attr('id', 'cardContainer');
-    $('body').append(cardContainer);   
+    let deckName = $('<input>').attr('id','deckName').attr('type', 'text');
+
+    $('body').append(cardContainer);
+    $('#cardContainer').append(deckName);
+
+    handleDeckInput();
+}
+
+function handleDeckInput() {
+    let deckNameInput = $('#deckName');
+
+    //handle enter keypress
+    deckNameInput.keypress( (e) => {
+        let key = e.which
+
+        if (key === 13) {
+            let deckName = deckNameInput.val();
+
+            // let postRequestData = deckName + currentUser
+            $.ajax({
+                url: '/postdeck',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({deckName: deckName, currentUser: currentUser }),
+                success: function(response) {
+                    console.log('Server response:', response);
+
+                    //Check if the deck was created successfully
+                    if (response.success) {
+                        alert('Deck has been created successfully')
+                    } else {
+                        //Deck already exists for current user
+                        console.error('This deck name already exists in users library')
+                        alert('This deck name already exists in your library!')
+                    }
+                },
+                error: function(error) {
+                    console.error('Error from post:', error);
+                    alert('Nope.');
+                }
+            });
+        }
+    })
+
 }
