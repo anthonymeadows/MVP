@@ -7,7 +7,6 @@ $(document).ready(function() {
 
 let currentUser = localStorage.getItem('username');
 
-
 function validateLogin(e) {
     e.preventDefault();
 
@@ -138,9 +137,12 @@ function buildPage() {
     }
 }
 
-function destroyPage() {
-    $('#currentUserContainer').remove();
-    $('.landingPage').remove();
+function destroyPage(element) {
+    if (element) {
+        $(element).remove();
+    } else {
+        $('#currentUserContainer, .landingPage').remove();
+    }
 }
 
 function handleRocketClick() {
@@ -153,16 +155,34 @@ function handleSatelliteClick() {
 
 function handleMoonClick() {
     destroyPage();
-    let moon = $('<div>').attr('id', 'moonpagemoon').on('click', handleMoonClick);
+
+    let moon = $('#moonpagemoon');
+    moon = $('<div>').attr('id', 'moonpagemoon').on('click', handleMoonClick);
     let moonImg = $('<img>').attr('src', '/images/moon.png');
-    moon.append(moonImg);
-    $('body').append(moon);
 
     let cardContainer = $('<div>').attr('id', 'cardContainer');
     let deckName = $('<input>').attr('id','deckName').attr('type', 'text');
 
-    $('body').append(cardContainer);
+    let backBtn = $('<button>', {
+        id: 'backBtn',
+        text: 'Back to homepage'
+    }).css({
+        'padding': '10px',
+        'cursor': 'pointer'
+    })
+
+    backBtn.on('click', function() {
+        destroyPage(cardContainer);
+        destroyPage(backBtn)
+        destroyPage(moon)
+        buildPage();
+    })
+
+
+
+    $('body').append(cardContainer, backBtn, moon);
     $('#cardContainer').append(deckName);
+    moon.append(moonImg);
 
     handleDeckInput();
 }
@@ -202,5 +222,4 @@ function handleDeckInput() {
             });
         }
     })
-
 }
