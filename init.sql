@@ -36,9 +36,9 @@ UNIQUE (deckname);
 
 
 INSERT INTO users (username, email, password, premium) VALUES
-    ('john_doe', 'john@example.com', 'password123', true),
-    ('jane_smith', 'jane@example.com', 'securepass', false),
-    ('bob_jones', 'bob@example.com', 'pass1234', true)
+    ('admin', '123@example', 'password', true),
+    ('123', '123@123', 'securepass', false),
+    ('bob_jones', 'bob@example.com', 'pass1234', false)
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO decks (deckname, user_id) VALUES

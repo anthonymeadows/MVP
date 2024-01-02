@@ -1,9 +1,16 @@
 $(document).ready(function() {
     if (window.location.href.indexOf("content.html") > -1) {
+        mustLogin()
         destroyPage();
         buildPage();
     }
 });
+
+function mustLogin() {
+    if(!isValidUser()) {
+        navigateToLogin()
+    }
+}
 
 let currentUser = localStorage.getItem('username');
 
@@ -33,6 +40,12 @@ function validateLogin(e) {
         .fail(() => {
             alert('Error occurred while processing login.');
         });
+}
+
+function isValidUser() {
+    const username = localStorage.getItem('username');
+    const isValid = !!username;
+    return isValid;
 }
 
 function createUser(e) {
@@ -87,6 +100,7 @@ function navigateToCreate() {
 }
 
 function buildPage() {
+    mustLogin();
     let currentUserContainer = $('<div>').attr('id', 'currentUserContainer');
     let currentUserElement = $('<div>').attr('id', 'currentUser');
     let underline = $('<div>').attr('id', 'underline');
@@ -155,6 +169,7 @@ function handleSatelliteClick() {
 
 function handleMoonClick() {
     destroyPage();
+    mustLogin();
 
     let moon = $('#moonpagemoon');
     moon = $('<div>').attr('id', 'moonpagemoon').on('click', handleMoonClick);
@@ -167,24 +182,61 @@ function handleMoonClick() {
         id: 'backBtn',
         text: 'Back to homepage'
     }).css({
-        'padding': '10px',
-        'cursor': 'pointer'
+        'position': 'absolute',
+        'top':'20px',
+        'right':'20px'
     })
+
+    let deckListContainer = $('<div>', {
+        id: 'deckListContainer',
+        text: 'Your Deck List'
+    }).css({
+        'text-align':'center',
+        'height': '750px',
+        'width': '400px',
+        'border': '1px solid black',
+        'border-radius':'10px',
+        'position':'absolute',
+        'top':'150px',
+        'left':'100px',
+        'font-size':'1.2em',
+        'color': '#B6EADA'
+    });
 
     backBtn.on('click', function() {
         destroyPage(cardContainer);
         destroyPage(backBtn)
         destroyPage(moon)
         buildPage();
-    })
+    });
 
 
 
-    $('body').append(cardContainer, backBtn, moon);
+    $('body').append(cardContainer, backBtn, moon, deckListContainer);
     $('#cardContainer').append(deckName);
     moon.append(moonImg);
 
+
+
     handleDeckInput();
+    createDeckList();
+}
+
+function createDeckList() {
+    $.ajax({
+        url: '/userDeckList',
+        type: 'GET',
+        contentType: 'application/json',
+        data: JSON.stringify(currentUser),
+        success: function(response) {
+            console.log('Server response:', response);
+            alert('Deck loaded successfully, please wait for content to load');
+        },
+        error: function(error) {
+            console.error('Error from post:', error);
+            alert('Error gathering deck list. Please try again.');
+        }
+    });
 }
 
 function handleDeckInput() {
