@@ -1,18 +1,33 @@
 $(document).ready(function() {
+    // Check if the current page is "content.html"
     if (window.location.href.indexOf("content.html") > -1) {
-        mustLogin()
+        mustLogin();
         destroyPage();
         buildPage();
     }
 });
+////////////////////////////////////////////////////////////////////
+///////////////////////// Global Variables ///////////////////////// 
+////////////////////////////////////////////////////////////////////
+
+let currentUser = localStorage.getItem('username');
+let selectedDeck;
+
+//////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////  Authentication / Login Functions  /////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+function isValidUser() {
+    const username = localStorage.getItem('username');
+    const isValid = !!username;
+    return isValid;
+}
 
 function mustLogin() {
     if(!isValidUser()) {
         navigateToLogin()
     }
 }
-
-let currentUser = localStorage.getItem('username');
 
 function validateLogin(e) {
     e.preventDefault();
@@ -40,12 +55,6 @@ function validateLogin(e) {
         .fail(() => {
             alert('Error occurred while processing login.');
         });
-}
-
-function isValidUser() {
-    const username = localStorage.getItem('username');
-    const isValid = !!username;
-    return isValid;
 }
 
 function createUser(e) {
@@ -98,6 +107,10 @@ function navigateToCreate() {
     localStorage.clear();
     window.location.href = "create.html";
 }
+
+////////////////////////////////////////////////////////////////////
+///////////////////////// DOM MANIPULATION /////////////////////////
+//////////////////////////////////////////////////////////////////// 
 
 function buildPage() {
     mustLogin();
@@ -170,6 +183,8 @@ function handleSatelliteClick() {
 function handleMoonClick() {
     destroyPage();
     mustLogin();
+    createFlashcard();
+    listOfIndexCards();
 
     let moon = $('#moonpagemoon');
     moon = $('<div>').attr('id', 'moonpagemoon').on('click', handleMoonClick);
@@ -235,7 +250,6 @@ function createDeckList() {
                     'display': 'flex',
                     'align-items': 'center',
                     'justify-content': 'space-between',
-                    'padding': '10px',
                 });
 
                 // Create li element
@@ -244,7 +258,9 @@ function createDeckList() {
                     'cursor': 'pointer'
                 });
 
-                li.on('click', function() {
+                li.on('click', (e) => {
+                    console.log(response.decks[i].deckname)
+                    selectedDeck = response.decks[i].deckname
                     alert('You clicked on: ' + response.decks[i].deckname);
                 });
 
@@ -282,36 +298,86 @@ function createDeckList() {
     });
 }
 
-
-function removeFromDB(parentElement) {
-    let deckName = parentElement.text();
-    console.log('Deleting deck:', deckName);
-
-    $.ajax({
-        url: '/deleteDeck',
-        type: 'DELETE',
-        contentType: 'application/json',
-        data: JSON.stringify({ deckName: deckName, username: currentUser }),
-        success: function(response) {
-            console.log('Server response:', response);
-
-             // Check if the deletion was successful
-             if (response.success) {
-                 console.log('Deck deleted successfully');
-                 // Remove the parent element if the deletion is successful
-                 parentElement.remove();
-             } else {
-                 console.error('Failed to delete deck:', response.error);
-                 alert('Error in success');
-             }
-        },
-        error: function(error) {
-            console.error('Error from delete:', error);
-            alert('Error deleting deck. Please try again.');
-        }
+function createFlashcard() {
+    let container = $('<div>', {
+        id: 'flashcard-container',
+        text: 'Add a card to the selected deck!'
+    }).css({
+        'position': 'absolute',
+        'height': '300px',
+        'width': '400px',
+        'bottom': '10px',
+        'right': '10px',
+        'text-align': 'center',
+        'padding': '20px'
     });
+
+    // Create a div to contain textareas and button
+    let flashcardDiv = $('<div>').addClass('flashcard-div');
+
+    // Create question textarea
+    let questionLabel = $('<label>').text("Question:");
+    flashcardDiv.append(questionLabel);
+
+    let questionTextarea = $('<textarea>').attr('rows', '4').attr('cols', '50').attr('id', 'question');
+    flashcardDiv.append(questionTextarea);
+
+    // Create answer textarea
+    let answerLabel = $('<label>').text("Answer:");
+    flashcardDiv.append(answerLabel);
+
+    let answerTextarea = $('<textarea>').attr('rows', '4').attr('cols', '50').attr('id', 'answer');
+    flashcardDiv.append(answerTextarea);
+
+    // Create a button for submission
+    let showAnswerButton = $('<button>').text('Add index card to deck').on('click', handleSubmit).css('margin-top', '10px');
+    flashcardDiv.append(showAnswerButton);
+
+    // Append the flashcardDiv to the main container
+    container.append(flashcardDiv);
+
+    $('body').append(container);
+};
+
+// Takes selected deck (string), makes an API call updates the DOM
+function listOfIndexCards(selectedDeck) {
+    // Create a div element for the scrollable container using jQuery
+    var scrollableContainer = $("<div>").css({
+        width: "30%",
+        height: "700px",
+        position: "absolute",
+        top: "60%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        overflowY: "auto",
+        border: "1px solid #ccc",
+        padding: "10px"
+    });
+
+    // Add content to the scrollable container
+    for (let i = 1; i <= 20; i++) {
+        let question = $("<p>").text("Question: " + i);
+        let answer = $("<p>").text("Answer: " + i);
+        let line = $("<p>").css ({width: '100%', border:'1px solid white'})
+        scrollableContainer.append(question, answer, line);
+    }
+
+    // Append the scrollable container to the body
+    $("body").append(scrollableContainer);
 }
 
+function handleSubmit() {
+    // Get the entered data from the textareas
+    let question = $('#question').val();
+    let answer = $('#answer').val();
+
+    // Display an alert with the entered data
+    alert('Question: ' + question + '\nAnswer: ' + answer);
+}
+
+//////////////////////////////////////////////////////////////////////// 
+///////////////////////// Server Communication /////////////////////////
+////////////////////////////////////////////////////////////////////////
 
 function handleDeckInput() {
     let deckNameInput = $('#deckName');
@@ -325,7 +391,6 @@ function handleDeckInput() {
         if (key === 13) {
             let deckName = deckNameInput.val();
 
-            // let postRequestData = deckName + currentUser
             $.ajax({
                 url: '/postdeck',
                 type: 'POST',
@@ -358,3 +423,5 @@ function handleDeckInput() {
         }
     })
 }
+
+//Coalesce key word for put / patch

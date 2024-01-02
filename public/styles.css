@@ -257,7 +257,7 @@ button:hover {
 
 #moonpagemoon {
     position: fixed;
-    top: 20%;
+    top: 15%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
@@ -265,7 +265,7 @@ button:hover {
 
 #cardContainer {
     position: fixed;
-    bottom: 5%;
+    bottom: 10px;
     left: 15%;
     transform: translate(-50%, -50%);
     z-index: 1;
@@ -286,4 +286,12 @@ button:hover {
     text-align: center;
     color: white;
     font-size: 24px;
+}
+
+.scrollable-container {
+    width: 50%;
+    height: 300px; 
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
 }
