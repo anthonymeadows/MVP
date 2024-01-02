@@ -23,10 +23,8 @@ app.get('/validateLogin', async (req, res) => {
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
 
         console.log('validating credentials');
-        // Check if a user with the given username exists
         if (result.rows.length > 0) {
             const storedPassword = result.rows[0].password;
-            // Compare the stored password with the provided password
             if (password === storedPassword) {
                 res.json({ success: true });
             } else {
@@ -42,12 +40,24 @@ app.get('/validateLogin', async (req, res) => {
 });
 
 app.get('/userDeckList', async (req, res) => {
-
     try {
         const { username } = req.query;
-        console.log(username);
-        // Perform database query based on the username
-        res.json({ success: true });
+
+        // Get userID
+        const userIDResult = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+
+        if (userIDResult.rows.length === 0) {
+            // User not found
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userID = userIDResult.rows[0].id;
+
+        // Get decks for the user
+        const decksResult = await pool.query('SELECT * FROM decks WHERE user_id = $1', [userID]);
+
+        // Send the decks as a JSON response
+        res.json({ success: true, decks: decksResult.rows });
     } catch (error) {
         console.error('Error executing database query:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
@@ -91,6 +101,40 @@ app.post('/postdeck', async (req, res) => {
             // Deck already exists for the current user
             res.status(200).json({ success: false, error: `${deckNameObj} already exists` });
         }
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+app.delete('/deleteDeck', async (req, res) => {
+    const { deckName, username } = req.body;
+    console.log(username)
+
+    try {
+        // Get userID
+        const userIDResult = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+
+        if (userIDResult.rows.length === 0) {
+            // User not found
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userID = userIDResult.rows[0].id;
+
+        // Check if the deck exists for the current user
+        const deckExistsResult = await pool.query('SELECT * FROM decks WHERE user_id = $1 AND deckname = $2', [userID, deckName]);
+
+        if (deckExistsResult.rows.length === 0) {
+            // Deck does not exist for the current user
+            return res.status(404).json({ success: false, error: 'Deck not found' });
+        }
+
+        // If the deck exists, delete it
+        await pool.query('DELETE FROM decks WHERE user_id = $1 AND deckname = $2', [userID, deckName]);
+
+        // Send success response
+        res.status(200).json({ success: true, message: 'Deck deleted successfully' });
     } catch (error) {
         console.error('Error executing database query:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });

@@ -4,6 +4,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #1e1e1e;
     color: #fff;
+    font-family: 'DotGothic16', sans-serif;
 }
 
 .container {
@@ -95,6 +96,22 @@ button:hover {
     justify-content: center;
     align-content: center;
     margin-top: 20vh;
+    border-radius: 50%;
+    filter: grayscale(10%);
+}
+
+#earth:hover {
+    animation: rotate 10s infinite linear;
+}
+
+#earth img:hover {
+    transform: scale(1.1) rotate(20deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+#earth img:not(:hover) {
+    transform: scale(1) rotate(0deg);
+    transition: transform 0.5s ease-in-out;
 }
 
 #rocket {
@@ -110,8 +127,30 @@ button:hover {
     height: auto;
 }
 
+#rocket:hover {
+    animation: shake 0.5s ease-in-out;
+}
+
 #rocket:hover + .rocket-box {
     display: block;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: rotate(10deg);
+    }
+    50% {
+        transform: rotate(-10deg);
+    }
+}
+
+.particle {
+    position: absolute;
+    background-color: #ffcc00;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    opacity: 0;
 }
 
 .rocket-box {
@@ -226,8 +265,8 @@ button:hover {
 
 #cardContainer {
     position: fixed;
-    top: 60%;
-    left: 50%;
+    bottom: 5%;
+    left: 15%;
     transform: translate(-50%, -50%);
     z-index: 1;
     width: 400px;
@@ -248,5 +287,3 @@ button:hover {
     color: white;
     font-size: 24px;
 }
-
-

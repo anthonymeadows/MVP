@@ -118,7 +118,7 @@ function buildPage() {
     rocket.append(rocketImg);
 
     let rocketBox = $('<div>').addClass('rocket-box').on('click', handleRocketClick);
-    let rocketBoxText = $('<p>').text('Explore my decks');
+    let rocketBoxText = $('<p>').text('Explore other decks');
     rocketBox.append(rocketBoxText);
 
     let satellite = $('<div>').attr('id', 'satellite').on('click', handleSatelliteClick);
@@ -194,8 +194,6 @@ function handleMoonClick() {
         'text-align':'center',
         'height': '750px',
         'width': '400px',
-        'border': '1px solid black',
-        'border-radius':'10px',
         'position':'absolute',
         'top':'150px',
         'left':'100px',
@@ -207,6 +205,7 @@ function handleMoonClick() {
         destroyPage(cardContainer);
         destroyPage(backBtn)
         destroyPage(moon)
+        destroyPage(deckListContainer);
         buildPage();
     });
 
@@ -227,20 +226,97 @@ function createDeckList() {
         url: '/userDeckList',
         type: 'GET',
         contentType: 'application/json',
-        data: JSON.stringify(currentUser),
-        success: function(response) {
-            console.log('Server response:', response);
-            alert('Deck loaded successfully, please wait for content to load');
+        data: { username: currentUser },
+        success: function (response) {
+            let warnUser = false;
+            for (let i = 0; i < response.decks.length; i++) {
+                // Create a container div
+                let container = $('<div>').addClass('liContainer').css({
+                    'display': 'flex',
+                    'align-items': 'center',
+                    'justify-content': 'space-between',
+                    'padding': '10px',
+                });
+
+                // Create li element
+                let li = $('<li>').text(response.decks[i].deckname).css({
+                    'list-style': 'none',
+                    'cursor': 'pointer'
+                });
+
+                li.on('click', function() {
+                    alert('You clicked on: ' + response.decks[i].deckname);
+                });
+
+
+                // Create delete image element
+                let deleteImage = $('<img>').attr('src', 'images/ex.jpg').addClass('delete-icon').css({
+                    'width': '16px',
+                    'height': '16px',
+                    'cursor': 'pointer',
+                    'padding': '10px',
+                });
+
+                deleteImage.on('click', (e) => {
+                    let parentElement = $(e.target).parent();
+                    if (warnUser) {
+                        //delete database table if user has been warned
+                        removeFromDB(parentElement)
+                    } else {
+                        //warn user
+                        alert('This action cannot be undone, you have been warned.')
+                        warnUser = true
+                    }
+                })
+                // Append li and deleteImage to the container
+                container.append(li, deleteImage);
+
+                // Append the container to the deckListContainer
+                $('#deckListContainer').append(container);
+            }
         },
-        error: function(error) {
+        error: function (error) {
             console.error('Error from post:', error);
             alert('Error gathering deck list. Please try again.');
         }
     });
 }
 
+
+function removeFromDB(parentElement) {
+    let deckName = parentElement.text();
+    console.log('Deleting deck:', deckName);
+
+    $.ajax({
+        url: '/deleteDeck',
+        type: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify({ deckName: deckName, username: currentUser }),
+        success: function(response) {
+            console.log('Server response:', response);
+
+             // Check if the deletion was successful
+             if (response.success) {
+                 console.log('Deck deleted successfully');
+                 // Remove the parent element if the deletion is successful
+                 parentElement.remove();
+             } else {
+                 console.error('Failed to delete deck:', response.error);
+                 alert('Error in success');
+             }
+        },
+        error: function(error) {
+            console.error('Error from delete:', error);
+            alert('Error deleting deck. Please try again.');
+        }
+    });
+}
+
+
 function handleDeckInput() {
     let deckNameInput = $('#deckName');
+
+    deckNameInput.attr('placeholder', 'Enter a new deck name...');
 
     //handle enter keypress
     deckNameInput.keypress( (e) => {
@@ -272,6 +348,13 @@ function handleDeckInput() {
                     alert('Nope.');
                 }
             });
+
+            //Remove and refresh user deck list 
+            let deckList = $('.liContainer')
+            let deleteImgs = $('.delete-icon')
+            destroyPage(deckList)
+            destroyPage(deleteImgs)
+            createDeckList()
         }
     })
 }
