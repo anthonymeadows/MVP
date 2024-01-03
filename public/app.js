@@ -375,10 +375,20 @@ function createDeckList() {
                 });
 
                 li.on('click', (e) => {
-                    console.log(response.decks[i].deckname)
-                    selectedDeck = response.decks[i].deckname
-                    alert('You clicked on: ' + response.decks[i].deckname);
+                    selectedDeck = response.decks[i].deckname;
+                    
+                    let selectedDeckElement = $('#selectedDeck');
+                    
+                    if (selectedDeckElement.length > 0) {
+                        // Element exists
+                        selectedDeckElement.text(`Selected Deck: ${selectedDeck}`);
+                    } else {
+                        // Element doesn't exist
+                        selectedDeckElement = $('<div>').attr('id', 'selectedDeck').text(`Selected Deck: ${selectedDeck}`);
+                        $('body').append(selectedDeckElement);
+                    }
                 });
+                
 
 
                 // Create delete image element
