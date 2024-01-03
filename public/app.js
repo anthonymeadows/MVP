@@ -190,10 +190,11 @@ function handleMoonClick() {
 
     backBtn.on('click', function() {
         destroyPage(cardContainer);
-        destroyPage(backBtn)
-        destroyPage(moon)
+        destroyPage(backBtn);
+        destroyPage(moon);
         destroyPage(deckListContainer);
-        destroyPage($(scrollableContainer))
+        destroyPage($(scrollableContainer));
+        destroyPage($('#flashcard-container'));
         buildPage();
     });
 
