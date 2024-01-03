@@ -193,6 +193,7 @@ function handleMoonClick() {
         destroyPage(backBtn)
         destroyPage(moon)
         destroyPage(deckListContainer);
+        destroyPage($(scrollableContainer))
         buildPage();
     });
 
@@ -252,7 +253,7 @@ function createFlashcard() {
 function listOfIndexCards(selectedDeck) {
 
     // Create a div element for the scrollable container
-    var scrollableContainer = $("<div>").css({
+    var scrollableContainer = $("<div>").attr('id', 'scrollableContainer').css({
         width: "30%",
         height: "700px",
         position: "absolute",
@@ -453,22 +454,26 @@ function removeFromDB(parentElement) {
     });
 }
 
-function getValidate(username, password) {
+function getValidate() {
+    let username = $('#username').val();
+    let password = $('#password').val();
+
     $.get('/validateLogin', { username: username, password: password })
-    .done((response) => {
-        if (response.success) {
-            localStorage.clear();
-            alert('Login successful!\nUsername: ' + username);
-            localStorage.setItem(`username`, username);
-            window.location.href = "content.html";
-        } else {
-            alert('Login failed. Please enter valid credentials.');
-            localStorage.clear();
-        }
-    })
-    .fail(() => {
-        alert('Error occurred while processing login.');
-    });
+        .done((response) => {
+            if (response.success) {
+                localStorage.clear();
+                alert('Login successful!\nUsername: ' + username);
+                localStorage.setItem('username', username);
+                window.location.href = "content.html";
+            } else {
+                alert('Login failed. Please enter valid credentials.');
+                localStorage.clear();
+            }
+        })
+        .fail(() => {
+            alert('Error occurred while processing login.');
+        });
 }
+
 
 //Coalesce key word for put / patch
