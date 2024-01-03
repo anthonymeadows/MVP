@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    // Check if the current page is "content.html"
     if (window.location.href.indexOf("content.html") > -1) {
         mustLogin();
         destroyPage();
@@ -40,21 +39,7 @@ function validateLogin(e) {
         return;
     }
 
-    $.get('/validateLogin', { username: username, password: password })
-        .done((response) => {
-            if (response.success) {
-                localStorage.clear();
-                alert('Login successful!\nUsername: ' + username);
-                localStorage.setItem(`username`, username);
-                window.location.href = "content.html";
-            } else {
-                alert('Login failed. Please enter valid credentials.');
-                localStorage.clear();
-            }
-        })
-        .fail(() => {
-            alert('Error occurred while processing login.');
-        });
+    getValidate();
 }
 
 function createUser(e) {
@@ -81,21 +66,8 @@ function createUser(e) {
         username: username,
         password: password
     };
-    $.ajax({
-        url: '/create',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(userData),
-        success: function(response) {
-            console.log('Server response:', response);
-            alert('User created successfully, please wait to be redirected');
-            navigateToLogin();
-        },
-        error: function(error) {
-            console.error('Error from post:', error);
-            alert('Error creating user. Please try again.');
-        }
-    });
+
+    createAjax();
 }
 
 function navigateToLogin() {
@@ -236,68 +208,6 @@ function handleMoonClick() {
     createDeckList();
 }
 
-function createDeckList() {
-    $.ajax({
-        url: '/userDeckList',
-        type: 'GET',
-        contentType: 'application/json',
-        data: { username: currentUser },
-        success: function (response) {
-            let warnUser = false;
-            for (let i = 0; i < response.decks.length; i++) {
-                // Create a container div
-                let container = $('<div>').addClass('liContainer').css({
-                    'display': 'flex',
-                    'align-items': 'center',
-                    'justify-content': 'space-between',
-                });
-
-                // Create li element
-                let li = $('<li>').text(response.decks[i].deckname).css({
-                    'list-style': 'none',
-                    'cursor': 'pointer'
-                });
-
-                li.on('click', (e) => {
-                    console.log(response.decks[i].deckname)
-                    selectedDeck = response.decks[i].deckname
-                    alert('You clicked on: ' + response.decks[i].deckname);
-                });
-
-
-                // Create delete image element
-                let deleteImage = $('<img>').attr('src', 'images/ex.jpg').addClass('delete-icon').css({
-                    'width': '16px',
-                    'height': '16px',
-                    'cursor': 'pointer',
-                    'padding': '10px',
-                });
-
-                deleteImage.on('click', (e) => {
-                    let parentElement = $(e.target).parent();
-                    if (warnUser) {
-                        //delete database table if user has been warned
-                        removeFromDB(parentElement)
-                    } else {
-                        //warn user
-                        alert('This action cannot be undone, you have been warned.')
-                        warnUser = true
-                    }
-                })
-                // Append li and deleteImage to the container
-                container.append(li, deleteImage);
-
-                // Append the container to the deckListContainer
-                $('#deckListContainer').append(container);
-            }
-        },
-        error: function (error) {
-            console.error('Error from post:', error);
-            alert('Error gathering deck list. Please try again.');
-        }
-    });
-}
-
 function createFlashcard() {
     let container = $('<div>', {
         id: 'flashcard-container',
@@ -312,28 +222,27 @@ function createFlashcard() {
         'padding': '20px'
     });
 
-    // Create a div to contain textareas and button
     let flashcardDiv = $('<div>').addClass('flashcard-div');
 
-    // Create question textarea
+    //Question textarea
     let questionLabel = $('<label>').text("Question:");
     flashcardDiv.append(questionLabel);
 
     let questionTextarea = $('<textarea>').attr('rows', '4').attr('cols', '50').attr('id', 'question');
     flashcardDiv.append(questionTextarea);
 
-    // Create answer textarea
+    //Answer textarea
     let answerLabel = $('<label>').text("Answer:");
     flashcardDiv.append(answerLabel);
 
     let answerTextarea = $('<textarea>').attr('rows', '4').attr('cols', '50').attr('id', 'answer');
     flashcardDiv.append(answerTextarea);
 
-    // Create a button for submission
+    //Submission button
     let showAnswerButton = $('<button>').text('Add index card to deck').on('click', handleSubmit).css('margin-top', '10px');
     flashcardDiv.append(showAnswerButton);
 
-    // Append the flashcardDiv to the main container
+    //Append
     container.append(flashcardDiv);
 
     $('body').append(container);
@@ -341,7 +250,8 @@ function createFlashcard() {
 
 // Takes selected deck (string), makes an API call updates the DOM
 function listOfIndexCards(selectedDeck) {
-    // Create a div element for the scrollable container using jQuery
+
+    // Create a div element for the scrollable container
     var scrollableContainer = $("<div>").css({
         width: "30%",
         height: "700px",
@@ -372,7 +282,7 @@ function handleSubmit() {
     let answer = $('#answer').val();
 
     // Display an alert with the entered data
-    alert('Question: ' + question + '\nAnswer: ' + answer);
+    alert('Question: ' + question + '\nAnswer: ' + answer + `\nhandleSubmit()`);
 }
 
 //////////////////////////////////////////////////////////////////////// 
@@ -422,6 +332,133 @@ function handleDeckInput() {
             createDeckList()
         }
     })
+}
+
+function createAjax () {
+    $.ajax({
+        url: '/create',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(userData),
+        success: function(response) {
+            console.log('Server response:', response);
+            alert('User created successfully, please wait to be redirected');
+            navigateToLogin();
+        },
+        error: function(error) {
+            console.error('Error from post:', error);
+            alert('Error creating user. Please try again.');
+        }
+    });
+}
+
+function createDeckList() {
+    $.ajax({
+        url: '/userDeckList',
+        type: 'GET',
+        contentType: 'application/json',
+        data: { username: currentUser },
+        success: function (response) {
+            let warnUser = false;
+            for (let i = 0; i < response.decks.length; i++) {
+                // Create a container div
+                let container = $('<div>').addClass('liContainer').css({
+                    'display': 'flex',
+                    'align-items': 'center',
+                    'justify-content': 'space-between',
+                });
+
+                // Create li element
+                let li = $('<li>').text(response.decks[i].deckname).css({
+                    'list-style': 'none',
+                    'cursor': 'pointer'
+                });
+
+                li.on('click', (e) => {
+                    console.log(response.decks[i].deckname)
+                    selectedDeck = response.decks[i].deckname
+                    alert('You clicked on: ' + response.decks[i].deckname);
+                });
+
+
+                // Create delete image element
+                let deleteImage = $('<img>').attr('src', 'images/ex.jpg').addClass('delete-icon').css({
+                    'width': '16px',
+                    'height': '16px',
+                    'cursor': 'pointer',
+                    'padding': '10px',
+                });
+
+                deleteImage.on('click', (e) => {
+                    let parentElement = $(e.target).parent();
+                    if (warnUser) {
+                        //delete database table if user has been warned
+                        removeFromDB(parentElement)
+                    } else {
+                        //warn user
+                        alert('This action cannot be undone, you have been warned.')
+                        warnUser = true
+                    }
+                })
+                // Append
+                container.append(li, deleteImage);
+
+                // Append
+                $('#deckListContainer').append(container);
+            }
+        },
+        error: function (error) {
+            console.error('Error from post:', error);
+            alert('Error gathering deck list. Please try again.');
+        }
+    });
+}
+
+function removeFromDB(parentElement) {
+    let deckName = parentElement.text();
+    console.log('Deleting deck:', deckName);
+
+    $.ajax({
+        url: '/deleteDeck',
+        type: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify({ deckName: deckName, username: currentUser }),
+        success: function(response) {
+            console.log('Server response:', response);
+
+             // Check if the deletion was successful
+             if (response.success) {
+                 console.log('Deck deleted successfully');
+                 // Remove the parent element if the deletion is successful
+                 parentElement.remove();
+             } else {
+                 console.error('Failed to delete deck:', response.error);
+                 alert('Error in success');
+             }
+        },
+        error: function(error) {
+            console.error('Error from delete:', error);
+            alert('Error deleting deck. Please try again.');
+        }
+    });
+}
+
+function getValidate(username, password) {
+    $.get('/validateLogin', { username: username, password: password })
+    .done((response) => {
+        if (response.success) {
+            localStorage.clear();
+            alert('Login successful!\nUsername: ' + username);
+            localStorage.setItem(`username`, username);
+            window.location.href = "content.html";
+        } else {
+            alert('Login failed. Please enter valid credentials.');
+            localStorage.clear();
+        }
+    })
+    .fail(() => {
+        alert('Error occurred while processing login.');
+    });
 }
 
 //Coalesce key word for put / patch
