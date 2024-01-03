@@ -11,6 +11,7 @@ $(document).ready(function() {
 
 let currentUser = localStorage.getItem('username');
 let selectedDeck;
+let flashcardArr;
 
 //////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////  Authentication / Login Functions  /////////////////////////
@@ -482,14 +483,7 @@ function ajaxDeckCards(selectedDeck) {
         contentType: 'application/json',
         data: { username: currentUser, deck: selectedDeck },
         success: function (response) {
-            for (let i = 0; i < response.flashcardIDs.rows.length; i++) {
-                let question = $("<p>").text("Question: " + i);
-                let answer = $("<p>").text("Answer: " + i);
-                let line = $("<p>").css ({width: '100%', border:'1px solid white'})
-                scrollableContainer.append(question, answer, line);
-            }
-
-            console.log(response.flashcardIDs.rows);
+            console.log(response.flashcards);
         },
         error: function(error) {
             console.error('Error from request:', error);

@@ -87,9 +87,15 @@ app.get('/indexCardsOfDeck', async (req, res) => {
         // NEEDS FOR LOOP 
         //const flashcards = await pool.query('SELECT question, answer FROM flashcards WHERE id = $1', [flashcardIDList]);
 
-        console.log(flashcardIDList)
+        let arr = [];
+        for (let i = 0; i < flashcardIDList.rows.length; i++) {
+            let flashcardID = flashcardIDList.rows[i].flashcard_id
+            const flashcard = await pool.query('SELECT question, answer FROM flashcards WHERE id = $1', [flashcardID]);
+            arr.push(flashcard.rows[0])
+        }
+        console.log(arr)
 
-        res.status(200).json({ deckID: deckID, userID: userID, flashcardIDs: flashcardIDList});
+        res.status(200).json({ deckID: deckID, userID: userID, flashcards: arr});
 
     } catch (error) {
         console.error('Error executing database query:', error);
