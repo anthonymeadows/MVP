@@ -64,6 +64,38 @@ app.get('/userDeckList', async (req, res) => {
     }
 });
 
+app.get('/indexCardsOfDeck', async (req, res) => {
+    try {
+        const { username, deck } = req.query;
+
+        // Get userID
+        const userIDResult = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+
+        if (userIDResult.rows.length === 0) {
+            // User not found
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const userID = userIDResult.rows[0].id;
+
+        // get deckID
+        const deckIDResult = await pool.query('SELECT id FROM decks WHERE user_id = $1', [userID]);
+
+        const deckID = deckIDResult.rows[0].id;
+        const flashcardIDList = await pool.query('SELECT flashcard_id FROM deck_flashcard WHERE deck_id = $1', [deckID]);
+        
+        // NEEDS FOR LOOP 
+        //const flashcards = await pool.query('SELECT question, answer FROM flashcards WHERE id = $1', [flashcardIDList]);
+
+        console.log(flashcardIDList)
+
+        res.status(200).json({ deckID: deckID, userID: userID, flashcardIDs: flashcardIDList});
+
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+})
 
 app.post('/create', async (req, res) => {
     const { username, password, email } = req.body;

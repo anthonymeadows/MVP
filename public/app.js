@@ -195,6 +195,7 @@ function handleMoonClick() {
         destroyPage(deckListContainer);
         destroyPage($(scrollableContainer));
         destroyPage($('#flashcard-container'));
+        destroyPage($('#selectedDeck'));
         buildPage();
     });
 
@@ -262,11 +263,10 @@ function listOfIndexCards(selectedDeck) {
         left: "50%",
         transform: "translate(-50%, -50%)",
         overflowY: "auto",
-        border: "1px solid #ccc",
-        padding: "10px"
     });
 
     // Add content to the scrollable container
+    ajaxDeckCards(selectedDeck) // ADD REAL CONTENT, BELOW FOR LOOP IS FILLER
     for (let i = 1; i <= 20; i++) {
         let question = $("<p>").text("Question: " + i);
         let answer = $("<p>").text("Answer: " + i);
@@ -391,8 +391,6 @@ function createDeckList() {
                     }
                 });
                 
-
-
                 // Create delete image element
                 let deleteImage = $('<img>').attr('src', 'images/ex.jpg').addClass('delete-icon').css({
                     'width': '16px',
@@ -475,6 +473,30 @@ function getValidate() {
             alert('Error occurred while processing login.');
         });
 }
+
+function ajaxDeckCards(selectedDeck) {
+    let scrollableContainer = $('.scrollableContainer')
+    $.ajax({
+        url: '/indexCardsOfDeck',
+        type: 'GET',
+        contentType: 'application/json',
+        data: { username: currentUser, deck: selectedDeck },
+        success: function (response) {
+            for (let i = 0; i < response.flashcardIDs.rows.length; i++) {
+                let question = $("<p>").text("Question: " + i);
+                let answer = $("<p>").text("Answer: " + i);
+                let line = $("<p>").css ({width: '100%', border:'1px solid white'})
+                scrollableContainer.append(question, answer, line);
+            }
+
+            console.log(response.flashcardIDs.rows);
+        },
+        error: function(error) {
+            console.error('Error from request:', error);
+            alert('Error');
+        }
+    });
+};
 
 
 //Coalesce key word for put / patch
