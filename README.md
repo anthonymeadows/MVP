@@ -53,5 +53,3 @@ erDiagram
 ```
 
 Documentation Used => https://mermaid.js.org/
-
-Special Thanks => https://github.com/ajaymarathe/bootstrap-login-template
